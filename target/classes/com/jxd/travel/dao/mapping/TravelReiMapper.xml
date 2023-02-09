@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace目前可以自定义要唯一，将来面向接口编程时对应dao接口，一个mapper相当于一个dao接口的实现类 -->
+<mapper namespace="com.jxd.travel.dao.ITravelReiDao">
+    <select id="getTravelReiList" resultType="travelRei">
+        select tno,empno,startdate,enddate,tdays,travelinfo,reidate,subsidy,totalrei,state,rejectreason,process from travelrei
+        <where>
+            <if test="startDate != '' and startDate != null">
+                reidate between #{startDate} and #{endDate}
+            </if>
+            and empno = #{empno}
+            and state != 5
+        </where>
+        order by tno
+    </select>
+    <select id="getTravelReiHistoryList" resultType="travelRei">
+        select tno,empno,startdate,enddate,tdays,travelinfo,reidate,subsidy,totalrei,state,rejectreason,process from travelrei
+        <where>
+            <if test="startDate != '' and startDate != null">
+                reidate between #{startDate} and #{endDate}
+            </if>
+            and empno = #{empno}
+            and state = 5
+        </where>
+        order by tno
+    </select>
+    <insert id="insertTravelRei" parameterType="map">
+        <selectKey keyProperty="tno" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        insert into travelrei(empno,startdate,enddate,tdays,travelinfo,reidate,subsidy,totalrei)
+        values(#{empno},#{startDate},#{endDate},#{tdays},#{travelinfo},#{reidate},#{subsidy},#{totalrei})
+    </insert>
+    <update id="updateTravelRei" parameterType="map">
+        update travelrei set startdate = #{startdate},enddate = #{enddate},tdays = #{tdays},travelinfo = #{travelinfo},subsidy = #{subsidy},totalrei = #{totalrei}
+        where tno = #{tno}
+    </update>
+    <update id="updateState">
+        update travelrei
+        <set>
+            <if test="state == 0">
+                state = 1,
+            </if>
+            <if test="state != 0">
+                state = #{state},
+            </if>
+            process = 'process',rejectreason = null
+        </set>
+        where tno = #{tno}
+    </update>
+    <delete id="deleteTravelReis">
+        delete from travelrei where tno in (
+        <foreach collection="list" item="tno" separator=",">
+            #{tno}
+        </foreach>
+        )
+    </delete>
+    <select id="getApprovalList" resultType="com.jxd.travel.dto.ApprovalDTO">
+        select temp.*
+        from(
+            select t.tno,t.empno,e.ename,t.startdate,t.enddate,t.tdays,t.travelinfo,t.reidate,t.subsidy,t.totalrei,t.state,t.rejectreason,t.process from travelrei t ,emp e
+            where t.empno = e.empno and t.state = #{state} and t.process = 'process'
+            ) temp
+        <where>
+            <if test="ename != '' and ename != null">
+                temp.ename like '%' #{ename} '%'
+            </if>
+        </where>
+        order by temp.tno
+    </select>
+    <update id="updateTravelReiState">
+        update travelrei
+        <set>
+            <if test="process != '' and process != null">
+                process = #{process},
+            </if>
+            <if test="rejectreason != '' and rejectreason != null">
+                rejectreason = #{rejectreason},
+            </if>
+            state = #{state}
+        </set>
+        where tno = #{tno};
+    </update>
+    <select id="getTravelReiInfo" resultType="integer">
+        select tno from travelrei where empno = #{empno}
+    </select>
+</mapper>

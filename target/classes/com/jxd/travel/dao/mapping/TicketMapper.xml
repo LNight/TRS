@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace目前可以自定义要唯一，将来面向接口编程时对应dao接口，一个mapper相当于一个dao接口的实现类 -->
+<mapper namespace="com.jxd.travel.dao.ITicketDao">
+    <select id="getAllTicketList" resultType="com.jxd.travel.dto.TicketDTO">
+        select tid,type,startposition,endposition,starttime,endtime,vname,money,travelinfo,tno,empno,image from ticket t
+        left join vehicle v
+        on t.vno = v.vno
+        <where>
+            <if test="startTime != '' and startTime != null">
+                starttime >= #{startTime} and endtime &lt;= #{endTime}
+            </if>
+            and empno = #{empno}
+        </where>
+        order by tid
+    </select>
+    <select id="getTicketList" resultType="com.jxd.travel.dto.TicketDTO">
+        select tid,type,startposition,endposition,starttime,endtime,vname,money,travelinfo,tno,empno from ticket t
+        left join vehicle v
+        on t.vno = v.vno
+        <where>
+            <if test="startTime != '' and startTime != null">
+                starttime >= #{startTime} and endtime &lt;= #{endTime}
+            </if>
+            and empno = #{empno}
+            and tno = 0
+        </where>
+        order by tid
+    </select>
+    <select id="getType" resultType="string">
+        select t.type from ticket t
+        where empno = #{empno}
+        order by tid desc
+        limit 1
+    </select>
+    <insert id="addTicket" parameterType="map">
+        insert into ticket(type,startposition,endposition,starttime,endtime,vno,money,empno,image)
+        values(#{type},#{startposition},#{endposition},#{startTime},#{endTime},#{vno},#{money},#{empno},#{image})
+    </insert>
+    <delete id="deleteTickets">
+        delete from ticket where tid in (
+        <foreach collection="list" item="tid" separator=",">
+            #{tid}
+        </foreach>
+        )
+    </delete>
+    <update id="updateTicket">
+        <foreach collection="list" item="tid" separator=";">
+            update ticket set travelinfo = #{travelinfo},tno = #{tno}
+            where tid = #{tid}
+        </foreach>
+    </update>
+    <select id="getSelectTicketList" resultType="com.jxd.travel.dto.TicketDTO">
+        select tid,type,startposition,endposition,starttime,endtime,vname,money,travelinfo,tno,empno from ticket t
+        left join vehicle v
+        on t.vno = v.vno
+        <where>
+            tno = #{tno}
+        </where>
+        order by tid
+    </select>
+    <update id="updateTicketTno">
+        update ticket set travelinfo = '',tno = 0 where tno = #{tno}
+    </update>
+    <select id="getVnoInfo" resultType="integer">
+        select tid from ticket where vno = #{vno}
+    </select>
+</mapper>

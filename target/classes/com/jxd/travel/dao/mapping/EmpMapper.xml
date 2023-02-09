@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace目前可以自定义要唯一，将来面向接口编程时对应dao接口，一个mapper相当于一个dao接口的实现类 -->
+<mapper namespace="com.jxd.travel.dao.IEmpDao">
+    <select id="empLogin" resultType="Emp">
+        select empno,ename,password,permissions from emp
+        where empno = #{empno} and password = #{password}
+    </select>
+
+    <select id="getAllEmpList" resultType="Emp">
+        select e.empno,e.ename,e.sex,e.phone from emp e
+        <where>
+            <if test="ename != '' and ename != null">
+                ename like '%' #{ename} '%'
+            </if>
+            and permissions = 0
+        </where>
+        order by empno
+    </select>
+
+    <insert id="insertEmp" parameterType="emp">
+        insert into emp(ename,sex,phone) values(#{ename},#{sex},#{phone})
+    </insert>
+
+    <update id="updateEmp" parameterType="emp">
+        update emp set ename = #{ename}, sex = #{sex}, phone = #{phone} where empno = #{empno}
+    </update>
+
+    <delete id="deleteEmps" >
+        delete from emp where empno in (
+        <foreach collection="list" item="eno" separator=",">
+            #{eno}
+        </foreach>
+        )
+    </delete>
+
+    <update id="resetPassword">
+        update emp set password = 123456 where empno = #{empno}
+    </update>
+
+    <select id="selectFPassword" resultType="string">
+        select password from emp where ename = #{ename}
+    </select>
+
+    <update id="updatePassword">
+        update emp set password = #{newPassword} where ename = #{ename}
+    </update>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace目前可以自定义要唯一，将来面向接口编程时对应dao接口，一个mapper相当于一个dao接口的实现类 -->
+<mapper namespace="com.jxd.travel.dao.IVehicleDao">
+    <select id="getVehicleList" resultType="vehicle">
+        select vno,vname from vehicle
+        <where>
+            <if test="vname != '' and vname != null">
+                vname like '%' #{vname} '%'
+            </if>
+        </where>
+        order by vno
+    </select>
+
+    <select id="getAllVehicleList" resultType="vehicle">
+        select vno,vname from vehicle order by vno
+    </select>
+
+    <insert id="insertVehicle" parameterType="vehicle">
+        insert into vehicle(vname) values(#{vname})
+    </insert>
+
+    <update id="updateVehicle" parameterType="vehicle">
+        update vehicle set vname = #{vname} where vno = #{vno}
+    </update>
+
+    <delete id="deleteVehicles">
+        delete from vehicle where vno in (
+        <foreach collection="list" item="vno" separator=",">
+            #{vno}
+        </foreach>
+        )
+    </delete>
+</mapper>
