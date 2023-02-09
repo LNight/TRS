@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface IEmpService {
+    /**
+     * 用户登录
+     * @param emp
+     * @return
+     */
     Emp empLogin(Emp emp);
 
     Map<String, Object> getAllEmpList(Map<String,String> map);
